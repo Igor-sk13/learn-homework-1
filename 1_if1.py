@@ -37,4 +37,4 @@ age = int(input())
 print(main(age))
 
 if __name__ == "__main__":
-    main(arg)
+    main(age)
