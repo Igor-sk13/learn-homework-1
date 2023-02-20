@@ -13,6 +13,9 @@
 
 """
 import logging
+import settings
+import ephem
+import datetime
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -20,7 +23,7 @@ logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO,
                     filename='bot.log')
 
-
+"""
 PROXY = {
     'proxy_url': 'socks5://t1.learn.python.ru:1080',
     'urllib3_proxy_kwargs': {
@@ -28,26 +31,42 @@ PROXY = {
         'password': 'python'
     }
 }
-
+"""
 
 def greet_user(update, context):
     text = 'Вызван /start'
     print(text)
     update.message.reply_text(text)
 
-
+"""
 def talk_to_me(update, context):
     user_text = update.message.text
     print(user_text)
-    update.message.reply_text(text)
+    update.message.reply_text(user_text)
+"""
+def planet(update, context):
+    text_planet = ' '.join(context.args)
+    print(text_planet)
+
+    if hasattr(ephem, text_planet):
+        target_planet = getattr(ephem, text_planet)
+        today = datetime.date.today()
+        planet_now = target_planet(today)
+
+        zodiac_name = ephem.constellation(planet_now)
+        update.message.reply_text(f'{text_planet} сегодня находится в {zodiac_name}')
+
+    else:
+        update.message.reply_text(f'{text_planet} еще неизвестна науке, попробуем поискать что-то другое?')
 
 
 def main():
-    mybot = Updater("КЛЮЧ, КОТОРЫЙ НАМ ВЫДАЛ BotFather", request_kwargs=PROXY, use_context=True)
+    mybot = Updater(settings.API_KEY, use_context=True)
 
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
-    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    #dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    dp.add_handler(CommandHandler("planet", planet))
 
     mybot.start_polling()
     mybot.idle()
